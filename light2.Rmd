@@ -1,0 +1,307 @@
+---
+title: "LIGHT2"
+author: "Jesse Bragger"
+output: html_notebook
+---
+
+```{r}
+library(readxl)
+light2 <- read_excel("light2.xls")
+# if you want to exclude AZ or FL take hashtags off below
+#light2 = subset(lightdark2, LOCATION != 'AZ')
+light2 = subset(light2, LOCATION != 'FL')
+light2 = subset(light2, SEX != 'F')
+light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B11')
+light2 = subset(light2, IND != 'NY_MJS_19x13_B5xB10_B2')
+light2 = subset(light2, IND != 'NY_MJS_19x13_B3xB8_B3')
+light2 = subset(light2, IND != 'NY_MJS_19x13_B5xB10_B8')
+light2 = subset(light2, IND != 'NY_MJS_83x80_A1xA8_A12')
+light2 = subset(light2, IND != 'NY_MJS_83x80_A3xA4_A12')
+light2 = subset(light2, IND != 'NY_MJS_83x80_A3xA4_A4')
+light2 = subset(light2, IND != 'AZ_TAS_89x80_B1xB2_B5')
+light2 = subset(light2, IND != 'AZ_TAS_89x80_B3xB4_B7')
+light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B8')
+light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B8')
+light2 = subset(light2, IND != 'NY_MJS_19x13_B3xB6_B3')
+light2 = subset(light2, IND != 'NY_MJS_19x13_B7xB10_B12')
+
+
+```
+
+```{r}
+#install.packages("mosaic")
+library(mosaic)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("utils")
+library(utils)
+```
+
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("epiDisplay")
+library(epiDisplay)
+#install.packages("tidyr")
+library(tidyr)
+```
+
+```{r}
+#install.packages("ggpubr")
+library(ggpubr)
+#install.packages("car")
+library(car)
+```
+
+```{r}
+#install.packages("easypower")
+library(easypower)
+#install.packages("heplots")
+library(heplots)
+
+```
+
+```{r}
+tally(light2$SEX)
+tally(light2$LOCATION)
+```
+
+```{r}
+mice <- 
+    light2 %>%
+ count(LOCATION, SEX, sort = TRUE)
+mice
+```
+## Beeswarm Plots 
+```{r}
+#install.packages('beeswarm')
+library(beeswarm)
+#Female=Black
+
+######### Total Time in Perimeter or Center (sec)
+#1  Total Sec Perimeter
+boxplot(light2$TotalSecPerimeter ~ light2$LOCATION,main= "Boxplot with Beeswarm", outline= FALSE, col='white', ylab = "Total Time in Perimeter (Sec)",xlab = "Location")
+beeswarm(light2$TotalSecPerimeter ~ light2$LOCATION, method = "swarm", pch = 20, add=TRUE, pwcol = as.factor(light2$SEX), )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+
+#2  Total Sec in Center
+boxplot(light2$TotalSecCenter ~ light2$LOCATION, main= "Boxplot with Beeswarm", xlab = "Location", ylab = "Total Time in Center (Sec)", outline= FALSE, col='white')
+beeswarm(light2$TotalSecCenter ~ light2$LOCATION, method = "swarm", add=TRUE, pch = 20, pwcol = as.factor(light2$SEX), ylim=c(0,1600) )
+legend("bottomleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+########## Total Time Ambulatory in Perimeter or Center (sec)
+#3  Total Ambulatory Perimeter 
+boxplot(light2$TotalSecAmbPerimeter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = "Total Time Ambulatory in Perimeter (Sec)",col='white')
+beeswarm(light2$TotalSecAmbPerimeter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX),  ) 
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+#4  Total Ambulatory Center
+boxplot(light2$TotalSecAmbCenter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE,xlab = "Location", ylab = "Total Time Ambulatory in Center (Sec)", col='white')
+beeswarm(light2$TotalSecAmbCenter ~ light2$LOCATION, method = "swarm", add=TRUE,pch = 20, pwcol = as.factor(light2$SEX),  ) 
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+######### Total Time Resting in Perimeter and Light (sec)
+#5  Total Resting Perimeter
+boxplot(light2$TotalSecRestPerimeter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE,  xlab = "Location", ylab = "Total Time Resting in Perimeter (Sec)",col='white')
+beeswarm(light2$TotalSecRestPerimeter ~ light2$LOCATION, method = "swarm", add=TRUE,pch = 20, pwcol = as.factor(light2$SEX), )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+#6  Total Resting Center
+boxplot(light2$TotalSecRestCenter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = "Total Time Resting in Center (Sec)",col='white')
+beeswarm(light2$TotalSecRestCenter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX),  )
+legend("topright", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+######### Total Number of Entries in Perimeter and Center
+#7  Total Number of Entries into Perimeter
+boxplot(light2$Entries2Perimeter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE,  xlab = "Location", ylab = "Total Number of Entries into Perimeter", col='white')
+beeswarm(light2$Entries2Perimeter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX),)
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+#8  Total Number of Entries into Center
+boxplot(light2$Entries2Center ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = " Total Number of Entries into Center", col='white')
+beeswarm(light2$Entries2Center ~ light2$LOCATION, method = "swarm", add=TRUE,pch = 20, pwcol = as.factor(light2$SEX), )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+######### Total Distance (cm) in Perimeter or Center
+#7  Total Distance Perimeter
+boxplot(light2$TotalDistPerimeter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE,xlab = "Location", ylab = "Total Distance (cm) in Perimeter", col='white')
+beeswarm(light2$TotalDistPerimeter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX),  )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+#8  Total Distance Z2 (Light)
+boxplot(light2$TotalDistCenter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = " Total Distance (cm) in Center", col='white')
+beeswarm(light2$TotalDistCenter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX), )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+
+######### Average Velocity in Perimeter or Center
+#7  Average Velocity Perimeter
+boxplot(light2$AvgVelPerimeter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = "Average velocity in Perimeter", col='white')
+beeswarm(light2$AvgVelPerimeter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX), )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+#8  Average Velocity Center
+boxplot(light2$AvgVelCenter ~ light2$LOCATION, main= "Boxplot with Beeswarm", outline= FALSE, xlab = "Location", ylab = " Average Velocity in Center",col='white')
+beeswarm(light2$AvgVelCenter ~ light2$LOCATION, method = "swarm",add=TRUE, pch = 20, pwcol = as.factor(light2$SEX),  )
+legend("topleft", legend = c("Male", "Female"), col = c("red", "black"), pch = 20)
+```
+## Histograms
+```{r}
+######### Total Time in Perimeter or Center (sec)
+#1  Total Sec Perimeter
+gf_dhistogram(~ light2$TotalSecPerimeter, data = light2, xlab="Total Time in Perimeter (sec)") %>% gf_fitdistr(dist = "norm")
+#2  Total Sec Center
+gf_dhistogram(~ light2$TotalSecCenter, data = light2, xlab="Total Time in Center (sec)") %>% gf_fitdistr(dist = "norm")
+
+########## Total Time Ambulatory in Dark or Light (sec)
+#3  Total Ambulatory Perimeter
+gf_dhistogram(~ light2$TotalSecAmbPerimeter, data = light2, xlab="Total Time Ambulatory in Perimeter (sec)") %>% gf_fitdistr(dist = "norm")
+#4  Total Ambulatory Center
+gf_dhistogram(~ light2$TotalSecAmbCenter, data = light2, xlab="Total Time Ambulatory in Center (sec)") %>% gf_fitdistr(dist = "norm")
+
+######### Total Time Resting in Perimeter or Center (sec)
+#5  Total Resting Perimeter
+gf_dhistogram(~ light2$TotalSecRestPerimeter, data = light2, xlab="Total Time Resting in Perimeter (sec)") %>% gf_fitdistr(dist = "norm")
+#6  Total Resting Center
+gf_dhistogram(~ light2$TotalSecRestCenter, data = light2, xlab="Total Time Resting in Center (sec)") %>% gf_fitdistr(dist = "norm")
+
+######### Total Number of Entries in Perimeter or Center
+#7  Total Number of Entries into Perimeter
+gf_dhistogram(~ light2$Entries2Perimeter, data = light2, xlab="Total Number of Entries in Perimeter") %>% gf_fitdistr(dist = "norm")
+#8  Total Number of Entries into Center
+gf_dhistogram(~ light2$Entries2Center, data = light2, xlab="Total Number of Entries in Center") %>% gf_fitdistr(dist = "norm")
+
+######### Total DIstance (cm) in Perimeter or Center
+#7  Total Distance Perimeter
+gf_dhistogram(~ light2$TotalDistPerimeter, data = light2, xlab="Total Distance (cm) in Perimeter") %>% gf_fitdistr(dist = "norm")
+#8  Total Distance Center
+gf_dhistogram(~ light2$TotalDistCenter, data = light2, xlab="Total Distance (cm) in Center") %>% gf_fitdistr(dist = "norm")
+```
+
+## ANOVAs
+```{r}
+######### Total Time in Perimeter or Center (sec)
+#1  Total Sec Perimeter
+model<-glm(light2$TotalSecPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#2  Total Sec Center
+model<-glm(light2$TotalSecCenter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+########## Total Time Ambulatory in Dark or Light (sec)
+#3  Total Ambulatory Perimeter
+model<-glm(light2$TotalSecAmbPerimeter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#4  Total Ambulatory Center
+model<-glm(light2$TotalSecAmbCenter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+######### Total Time Resting in Perimeter or Center (sec)
+#5  Total Resting Perimeter
+model<-glm(light2$TotalSecRestPerimeter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#6  Total Resting Center
+model<-glm(light2$TotalSecRestCenter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+######### Total Number of Entries in Perimeter or Center
+#7  Total Number of Entries into Perimeter
+model<-glm(light2$Entries2Perimeter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#8  Total Number of Entries into Center
+model<-glm(light2$Entries2Center ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+######### Total DIstance (cm) in Perimeter or Center
+#7  Total Distance Perimeter
+model<-glm(light2$TotalDistPerimeter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#8  Total Distance Center
+model<-glm(light2$TotalDistCenter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+```
+## Tukey Tests
+```{r}
+#  Total Perimeter
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecPerimeter ~ light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Sec Center
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecCenter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Ambulatory Perimeter
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecAmbPerimeter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Ambulatory Center
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecAmbCenter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Sec Rest Perimeter
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecRestPerimeter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Sec Rest Center
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalSecRestCenter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Number of Entries into Perimeter
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$Entries2Perimeter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+#  Total Number of Entries into Center
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$Entries2Center ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+
+#  Total Distance Perimeter
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalDistPerimeter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+#  Total Distance Z2 (Light)
+library(reshape2)
+library(broom)
+model<-TukeyHSD(glm(light2$TotalDistCenter ~  light2$LOCATION ))
+as.data.frame(tidy(model)) %>%
+    filter(adj.p.value < .05)
+model
+```
