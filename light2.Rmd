@@ -8,7 +8,7 @@ output: html_notebook
 library(readxl)
 light2 <- read_excel("light2.xls")
 # if you want to exclude AZ or FL take hashtags off below
-#light2 = subset(lightdark2, LOCATION != 'AZ')
+light2 = subset(light2, LOCATION != 'AZ')
 light2 = subset(light2, LOCATION != 'FL')
 light2 = subset(light2, SEX != 'F')
 light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B11')
@@ -304,4 +304,13 @@ model<-TukeyHSD(glm(light2$TotalDistCenter ~  light2$LOCATION ))
 as.data.frame(tidy(model)) %>%
     filter(adj.p.value < .05)
 model
+```
+
+##PCA Analysis
+```{r}
+library(ggfortify)
+df <- light2[ ,c(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)]
+pca_res <- prcomp(df, scale. = TRUE)
+
+autoplot(pca_res, data= light2, colour = 'LOCATION', frame=TRUE)
 ```
