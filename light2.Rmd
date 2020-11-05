@@ -173,7 +173,7 @@ gf_dhistogram(~ light2$TotalDistPerimeter, data = light2, xlab="Total Distance (
 gf_dhistogram(~ light2$TotalDistCenter, data = light2, xlab="Total Distance (cm) in Center") %>% gf_fitdistr(dist = "norm")
 ```
 
-## ANOVAs
+## ANOVAs for Each Response Variable
 ```{r}
 ######### Total Time in Perimeter or Center (sec)
 #1  Total Sec Perimeter
@@ -226,6 +226,7 @@ results<-Anova(model, test="F")
 results
 
 ```
+
 ## Tukey Tests
 ```{r}
 #  Total Perimeter
@@ -314,3 +315,32 @@ pca_res <- prcomp(df, scale. = TRUE)
 
 autoplot(pca_res, data= light2, colour = 'LOCATION', frame=TRUE)
 ```
+
+```{r}
+###PCA added to pca dataframe
+str(pca_res)
+summary(pca_res)
+pca<-cbind(df,pca_res[["x"]])
+str(pca)
+pca
+```
+#PCA ANOVAs
+```{r}
+#Using PCA to account for new variables with the predictor LOCATION. 
+##PC1
+model<-glm(pca$PC1 ~ light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+##PC2
+model<-glm(pca$PC2 ~ light2$LOCATION)
+results<-Anova(model, test="F")
+results
+
+##PC3
+model<-glm(pca$PC3 ~ light2$LOCATION)
+results<-Anova(model, test="F")
+results
+```
+
+
