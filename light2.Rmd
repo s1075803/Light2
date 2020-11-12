@@ -24,7 +24,7 @@ light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B8')
 light2 = subset(light2, IND != 'EDM_TAS_111x165_B1xB2_B8')
 light2 = subset(light2, IND != 'NY_MJS_19x13_B3xB6_B3')
 light2 = subset(light2, IND != 'NY_MJS_19x13_B7xB10_B12')
-
+#light2 = subset(light2, IND !='BR_FMM_222x254_A1xA2_A2')
 
 ```
 
@@ -58,8 +58,12 @@ library(car)
 library(easypower)
 #install.packages("heplots")
 library(heplots)
-
 ```
+```{r}
+#install.packages("DescTools")
+library(DescTools)
+```
+
 
 ```{r}
 tally(light2$SEX)
@@ -167,11 +171,77 @@ gf_dhistogram(~ light2$Entries2Perimeter, data = light2, xlab="Total Number of E
 gf_dhistogram(~ light2$Entries2Center, data = light2, xlab="Total Number of Entries in Center") %>% gf_fitdistr(dist = "norm")
 
 ######### Total DIstance (cm) in Perimeter or Center
-#7  Total Distance Perimeter
+#9  Total Distance Perimeter
 gf_dhistogram(~ light2$TotalDistPerimeter, data = light2, xlab="Total Distance (cm) in Perimeter") %>% gf_fitdistr(dist = "norm")
-#8  Total Distance Center
+#10  Total Distance Center
 gf_dhistogram(~ light2$TotalDistCenter, data = light2, xlab="Total Distance (cm) in Center") %>% gf_fitdistr(dist = "norm")
+
+######### Average Velocity in Perimeter or Center
+#11  Avg Velocity Perimeter
+gf_dhistogram(~ light2$AvgVelPerimeter, data = light2, xlab="Total Distance (cm) in Perimeter") %>% gf_fitdistr(dist = "norm")
+#12  Avg Velocity Center
+gf_dhistogram(~ light2$TotalDistCenter, data = light2, xlab="Total Distance (cm) in Perimeter") %>% gf_fitdistr(dist = "norm")
 ```
+# Residual Plots 
+```{r}
+######### Total Time in Perimeter or Center (sec)
+#1  Total Sec Perimeter
+scatter<-lm(light2$TotalSecPerimeter~light2$LOCATION)
+plot(scatter)
+#2  Total Sec Center
+scatter<-lm(light2$TotalSecCenter~light2$LOCATION)
+plot(scatter)
+```
+```{r}
+########## Total Time Ambulatory in Dark or Light (sec)
+#3  Total Ambulatory Perimeter
+scatter<-lm(light2$TotalSecAmbPerimeter~light2$LOCATION)
+plot(scatter)
+#4  Total Ambulatory Center
+scatter<-lm(light2$TotalSecAmbCenter~light2$LOCATION)
+plot(scatter)
+```
+
+```{r}
+######### Total Time Resting in Perimeter or Center (sec)
+#5  Total Resting Perimeter
+scatter<-lm(light2$TotalSecRestPerimeter~light2$LOCATION)
+plot(scatter)
+#6  Total Resting Center
+scatter<-lm(light2$TotalSecRestCenter~light2$LOCATION)
+plot(scatter)
+```
+
+```{r}
+######### Total Number of Entries in Perimeter or Center
+#7  Total Number of Entries into Perimeter
+scatter<-lm(light2$Entries2Perimeter~light2$LOCATION)
+plot(scatter)
+#8  Total Number of Entries into Center
+scatter<-lm(light2$Entries2Center~light2$LOCATION)
+plot(scatter)
+```
+
+```{r}
+######### Total DIstance (cm) in Perimeter or Center
+#9  Total Distance Perimeter
+scatter<-lm(light2$TotalDistPerimeter~light2$LOCATION)
+plot(scatter)
+#10  Total Distance Center
+scatter<-lm(light2$TotalDistCenter~light2$LOCATION)
+plot(scatter)
+```
+
+```{r}
+######### Average Velocity in Perimeter or Center
+#11  Avg Velocity Perimeter
+scatter<-lm(light2$AvgVelPerimeter~light2$LOCATION)
+plot(scatter)
+#12  Avg Velocity Center
+scatter<-lm(light2$AvgVelCenter~light2$LOCATION)
+plot(scatter)
+```
+
 
 ## ANOVAs for Each Response Variable
 ```{r}
@@ -216,15 +286,24 @@ results<-Anova(model, test="F")
 results
 
 ######### Total DIstance (cm) in Perimeter or Center
-#7  Total Distance Perimeter
+#9  Total Distance Perimeter
 model<-glm(light2$TotalDistPerimeter ~  light2$LOCATION)
 results<-Anova(model, test="F")
 results
-#8  Total Distance Center
+#10  Total Distance Center
 model<-glm(light2$TotalDistCenter ~  light2$LOCATION)
 results<-Anova(model, test="F")
 results
 
+######### Average Velocity in Perimeter or Center
+#11  Avg Velocity Perimeter
+model<-glm(light2$AvgVelPerimeter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
+#12  Avg Velocity Center
+model<-glm(light2$AvgVelCenter ~  light2$LOCATION)
+results<-Anova(model, test="F")
+results
 ```
 
 ## Tukey Tests
@@ -324,6 +403,7 @@ pca<-cbind(df,pca_res[["x"]])
 str(pca)
 pca
 ```
+
 #PCA ANOVAs
 ```{r}
 #Using PCA to account for new variables with the predictor LOCATION. 
@@ -342,5 +422,124 @@ model<-glm(pca$PC3 ~ light2$LOCATION)
 results<-Anova(model, test="F")
 results
 ```
+
+## MANOVA 
+```{r}
+#If the p-value is less than or equal to the significance level, you can conclude that the differences between the means are statistically significant.  linearly independent, an assumption in manova. provided only time in perimeter bc perimeter+center=30 min. 
+res.man <- manova(cbind(light2$TotalSecPerimeter, light2$TotalSecAmbPerimeter, light2$TotalSecAmbCenter, light2$TotalSecRestPerimeter, light2$TotalSecRestCenter, light2$Entries2Perimeter, light2$Entries2Center, light2$TotalDistPerimeter, light2$TotalDistCenter, light2$AvgVelPerimeter, light2$AvgVelCenter) ~ light2$LOCATION , data = light2)
+summary(res.man, test="Pillai")
+```
+```{r}
+#install.packages("rgl")
+library(rgl)
+manplot<-lm(cbind(light2$TotalSecPerimeter, light2$TotalSecAmbPerimeter, light2$TotalSecAmbCenter, light2$TotalSecRestPerimeter, light2$TotalSecRestCenter, light2$Entries2Perimeter, light2$Entries2Center, light2$TotalDistPerimeter, light2$TotalDistCenter, light2$AvgVelPerimeter, light2$AvgVelCenter) ~ light2$LOCATION, data=light2)
+heplot(manplot, size="effect")
+#http://euclid.psych.yorku.ca/datavis/papers/ToulouseR-2x2.pdf
+```
+
+
+## ANOVAs Compared with Bonferroni Correction
+```{r}
+# Bonferroni reduces the instance of a false positive
+# prevent data from incorrectly appearing to be statistically significant
+# p-value for each test must be equal to its alpha divided by the number of tests performed
+
+######### Total Time in Perimeter or Center (sec)
+#1  Total Sec Perimeter
+model<-glm(light2$TotalSecPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#2  Total Sec Center
+model<-glm(light2$TotalSecCenter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+
+########## Total Time Ambulatory in Dark or Light (sec)
+#3  Total Ambulatory Perimeter
+model<-glm(light2$TotalSecAmbPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#4  Total Ambulatory Center
+model<-glm(light2$TotalSecAmbCenter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+
+######### Total Time Resting in Perimeter or Center (sec)
+#5  Total Resting Perimeter
+model<-glm(light2$TotalSecRestPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#6  Total Resting Center
+model<-glm(light2$TotalSecRestCenter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+
+######### Total Number of Entries in Perimeter or Center
+#7  Total Number of Entries into Perimeter
+model<-glm(light2$Entries2Perimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#8  Total Number of Entries into Center
+model<-glm(light2$Entries2Center ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+
+######### Total DIstance (cm) in Perimeter or Center
+#9  Total Distance Perimeter
+model<-glm(light2$TotalDistPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#10  Total Distance Center
+model<-glm(light2$TotalDistCenter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+
+######### Average Velocity in Perimeter or Center
+#11  Avg Velocity Perimeter
+model<-glm(light2$AvgVelPerimeter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+#12  Avg Velocity Center
+model<-glm(light2$AvgVelCenter ~ light2$LOCATION)
+results<-Anova(model, test="F", p.adj = "bonferroni")
+results
+PostHocTest(aov(model, test="F"), which = NULL,
+            method = c("bonferroni"),
+            conf.level = 0.95, ordered = FALSE)
+```
+
 
 
